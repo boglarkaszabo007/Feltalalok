@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>Kutatók CRUD</title>
+<style>
+/* Általános stílusok */
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+    padding: 20px;
+    text-align: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Űrlap inputok és gombok */
+input {
+    margin: 5px;
+    padding: 5px;
+    border: 1px solid #888;
+    border-radius: 4px;
+}
+
+button {
+    margin-left: 5px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #4facfe;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: #00f2fe;
+}
+
+/* Táblázat stílus */
+table {
+    border-collapse: collapse;
+    width: 80%;
+    margin: 20px auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+th, td {
+    border: 1px solid #333;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: rgba(0,0,0,0.1);
+}
+
+/* Modális ablak */
+#editModal {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+#editModalContent {
+    background-color: rgba(255, 255, 255, 0.95);
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    border-radius: 10px;
+}
+
+#editModalContent input {
+    width: 100%;
+    margin: 5px 0;
+    padding: 5px;
+}
+</style>
+</head>
+<body>
+
+<h1>Kutatók CRUD</h1>
+
+<!-- Új rekord hozzáadása -->
+<div>
+    <input type="text" id="nev" placeholder="Név">
+    <input type="number" id="szul" placeholder="Születési év">
+    <input type="number" id="meghal" placeholder="Halálozási év">
+    <button id="addBtn">Hozzáadás</button>
+</div>
+
+<!-- Lista -->
+<div id="list"></div>
+
+<!-- Modális szerkesztés -->
+<div id="editModal">
+    <div id="editModalContent">
+        <h3>Szerkesztés</h3>
+        <label>FKOD:</label>
+        <input type="number" id="editFkod">
+        <label>Név:</label>
+        <input type="text" id="editNev" placeholder="Név">
+        <label>Születési év:</label>
+        <input type="number" id="editSzul" placeholder="Születési év">
+        <label>Halálozási év:</label>
+        <input type="number" id="editMeghal" placeholder="Halálozási év">
+        <button id="saveEditBtn">Mentés</button>
+        <button id="cancelEditBtn">Mégse</button>
+    </div>
+</div>
+
+<script>
+const API_URL = "http://w.apexracing01.infora.hu/Feltalalok/api1.php";
+let kutatok = [];
+
+// Adatok betöltése
+async function loadData() {
+    try {
+        const res = await fetch(API_URL);
+        kutatok = await res.json();
+        render();
+    } catch(err){
+        console.error("Hiba a betöltésnél:", err);
+    }
+}
+
+// Lista renderelése
+function render() {
+    const listDiv = document.getElementById("list");
+    if(kutatok.length===0){ listDiv.innerHTML="<p>Nincsenek adatok.</p>"; return; }
+
+    let html="<table><tr><th>FKOD</th><th>Név</th><th>Születési év</th><th>Halálozási év</th><th>Műveletek</th></tr>";
+    kutatok.forEach(k => {
+        html += `<tr>
+            <td>${k.fkod}</td>
+            <td>${k.nev}</td>
+            <td>${k.szul===null?'':k.szul}</td>
+            <td>${k.meghal===null?'':k.meghal}</td>
+            <td>
+                <button onclick="openEditModal(${k.fkod})">Szerkesztés</button>
+                <button onclick="deleteItem(${k.fkod})">Törlés</button>
+            </td>
+        </tr>`;
+    });
+    html += "</table>";
+    listDiv.innerHTML = html;
+}
+
+// Új rekord hozzáadása
+document.getElementById("addBtn").addEventListener("click", async () => {
+    const nev = document.getElementById("nev").value;
+    const szul = document.getElementById("szul").value || null;
+    const meghal = document.getElementById("meghal").value || null;
+
+    try {
+        await fetch(API_URL, {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({nev, szul, meghal})
+        });
+        document.getElementById("nev").value='';
+        document.getElementById("szul").value='';
+        document.getElementById("meghal").value='';
+        await loadData();
+    } catch(err){
+        console.error("Hiba a hozzáadásnál:", err);
+    }
+});
+
+// Modális szerkesztés megnyitása
+function openEditModal(fkod) {
+    const item = kutatok.find(k => Number(k.fkod) === Number(fkod));
+    if(!item) return;
+
+    const editFkodInput = document.getElementById("editFkod");
+    editFkodInput.value = item.fkod;
+    editFkodInput.dataset.original = item.fkod;
+    document.getElementById("editNev").value = item.nev;
+    document.getElementById("editSzul").value = item.szul || '';
+    document.getElementById("editMeghal").value = item.meghal || '';
+    document.getElementById("editModal").style.display = "block";
+}
+
+// Mentés modálból
+document.getElementById("saveEditBtn").addEventListener("click", async () => {
+    const oldFkod = document.getElementById("editFkod").dataset.original;
+    const newFkod = document.getElementById("editFkod").value;
+    const nev = document.getElementById("editNev").value;
+    const szul = document.getElementById("editSzul").value || null;
+    const meghal = document.getElementById("editMeghal").value || null;
+
+    try {
+        await fetch(API_URL, {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({_method:"PUT", oldFkod, newFkod, nev, szul, meghal})
+        });
+        closeEditModal();
+        await loadData();
+    } catch(err){
+        console.error("Hiba a mentésnél:", err);
+    }
+});
+
+// Mégse modálisban
+document.getElementById("cancelEditBtn").addEventListener("click", closeEditModal);
+function closeEditModal(){ document.getElementById("editModal").style.display="none"; }
+
+// Törlés
+async function deleteItem(fkod){
+    if(!confirm("Biztosan törlöd a rekordot?")) return;
+
+    try {
+        await fetch(API_URL, {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({_method:"DELETE", fkod})
+        });
+        await loadData();
+    } catch(err){
+        console.error("Hiba a törlésnél:", err);
+    }
+}
+
+loadData();
+</script>
+
+</body>
+</html>

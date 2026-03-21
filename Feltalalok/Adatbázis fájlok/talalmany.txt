@@ -1,0 +1,147 @@
+78	mikrobarázdás hanglemez
+24	fázisváltós villamos mozdony
+31	Frommer-pisztoly
+46	Heller—Forgó hűtőtorony
+56	hűtőtorony
+72	légkondenzációs hűtőtorony
+84	Ostwald-Buzágh-féle üledékszabály
+89	PePy
+136	villámdelejes forgony
+45	HDTV
+134	Vaskapu-vízerőmű
+40	gulyáságyú
+33	F típusjelű három­fázisú aszinkron motorsorozat
+34	FF háromfázisú motorsorozat
+38	gázlift
+108	szénhidrogén-bányászat
+115	szolstabilitáskontinuitás elmélet
+119	telefonközpont
+12	bányavizek elleni védekezés
+51	hologramkiállítás
+53	hőenergetikai képzés
+54	HSCS
+59	IRX típusú ionoszféra-kutató berendezés
+65	kéregöntés
+88	papírgyártás
+116	szuperintenzív habelárasztás
+122	titkosítás
+127	turbógenerátor-gyártás
+8	atomreaktor
+14	csillagmotor
+18	elektroncsöves audio-méter
+19	előkamrás sűrítő nélküli dízelmotor
+28	forgórostélyos gázgenerátor
+35	Ganz-gyár
+36	Ganz—Jendrassik-motor
+50	Hold-radar
+61	Katicabogár
+82	négyütemű belső égésű motor
+90	perforátor
+94	PKZ helikopter
+98	repulziós motor
+113	Szilvay-féle szárazoltásos rendszer
+124	traktor
+125	transzformátor
+132	Van de Graaff generátor
+139	vizuális mikroprocesszor
+144	zárt vasmagú transzformátor
+2	analogikai celluláris számítógép
+16	Duflex fényképezőgép
+25	fejtőgép
+27	forgódugattyús gép
+29	formulavezérlésű számítógép
+32	F-típusú fejtő-rakodó gép
+39	Gerle repülőgép
+55	Hungária-Drill sorvetőgép
+66	Kolibri repülőgép
+75	marófejes jövesztőgép
+83	optikai rácsosztó gép
+85	öngerjesztésű kompaundált szinkrongép
+130	tűzgép
+135	vetőgép
+143	vonalzógép
+3	apró bordás hőcserélő
+5	árammérő
+44	háromdimenziós kijelző
+58	indukciós fogyasztásmérő
+76	megvilágításmérő
+93	Pintsch-féle gázmérő
+106	szakadásiszög-mérő
+120	termolumineszcens dózismérő
+123	törtképes távmérő
+128	turbógenerátor - tekercselő
+137	villámfeszítő
+140	vízemelő
+4	áramfogó
+20	egysarkú villámindító
+41	gyorstávíró
+49	holdautó
+70	lemezmotor és lemezautó
+86	ősdinamó
+95	porlasztó
+97	Reich-fogó
+101	részecskegyorsító
+107	szárazoltó
+112	színes televízió
+118	telefonhírmondó
+121	termonukleáris reakció
+129	tükörcsavaros képíró
+142	volfrámszálas izzó
+146	automata sebességváltó
+62	karsztvíz elleni védekezés a bányaüzemekben
+69	kristálynövesztés űrkemencében
+147	C-vitamin
+37	Gasparcolor színes film
+43	hangosfilm
+64	Kármán-spektrum
+114	színes film
+145	golyóstoll
+47	hengerszék
+57	impulzus tűzoltókészülék
+63	Kármán-féle örvénysornak
+73	légzőkészülék
+80	mozdonyok
+102	Segner-kerék
+111	szimmetria­elvek
+74	LP—long-playing
+91	Petzval-féle összeg
+15	derivatográf
+23	farinográf
+22	excimer lézeres abláció háromdimenziós gyors­fényképezése
+26	fényképezőgép-lencse
+92	Pille
+105	Szabó-féle görgős eke
+60	íven függő vonórudas vashíd
+100	réselőrúd
+126	TS-uszályhíd
+10	BASIC
+17	EDVAC
+21	ENIAC
+99	réselőlánc
+1	aerodinamika
+6	atombomba
+7	atommáglya
+11	Bánki-turbina
+13	chicagói atommáglya
+30	főzés fizikája
+42	hangfelvevő kamera
+48	hidrogénbomba
+52	holográfia
+67	körbe látó optika
+68	kriptonlámpa
+77	méter fogalma
+79	molekulaspektroszkópia
+81	napenergia
+87	PAL-optika
+96	rakéta
+109	szikrapróba
+110	síkszita
+117	tekercsrugós vadászpuska
+133	Valtellina
+138	villanyóra
+141	vízóra
+9	atmoszferikus gőzgép 
+71	léggép 
+104	sűrített levegő 
+131	űrkemence 
+103	Super Kodak Six-20
