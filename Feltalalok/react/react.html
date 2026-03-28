@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>Kutatók CRUD - React</title>
+
+<!-- CSS fájl -->
+<link rel="stylesheet" href="../style.css">
+
+<!-- React CDN -->
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+<!-- JSX fordító -->
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+</head>
+
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+const { useState, useEffect } = React;
+
+const API_URL = "http://w.apexracing01.infora.hu/Feltalalok/api1.php";
+
+function App(){
+
+  const [kutatok,setKutatok]=useState([]);
+  const [nev,setNev]=useState("");
+  const [szul,setSzul]=useState("");
+  const [meghal,setMeghal]=useState("");
+
+  const [modalOpen,setModalOpen]=useState(false);
+  const [editData,setEditData]=useState({
+      oldFkod:null,
+      newFkod:"",
+      nev:"",
+      szul:"",
+      meghal:""
+  });
+
+  async function loadData(){
+      const res=await fetch(API_URL);
+      const data=await res.json();
+      setKutatok(data);
+  }
+
+  useEffect(()=>{ loadData(); },[]);
+
+  async function addItem(){
+      await fetch(API_URL,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+              nev,
+              szul:szul||null,
+              meghal:meghal||null
+          })
+      });
+
+      setNev("");
+      setSzul("");
+      setMeghal("");
+      loadData();
+  }
+
+  async function deleteItem(fkod){
+      if(!confirm("Biztosan törlöd?")) return;
+
+      await fetch(API_URL,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({_method:"DELETE",fkod})
+      });
+
+      loadData();
+  }
+
+  function openEditModal(item){
+      setEditData({
+          oldFkod:item.fkod,
+          newFkod:item.fkod,
+          nev:item.nev,
+          szul:item.szul||"",
+          meghal:item.meghal||""
+      });
+      setModalOpen(true);
+  }
+
+  async function saveEdit(){
+      await fetch(API_URL,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+              _method:"PUT",
+              ...editData
+          })
+      });
+
+      setModalOpen(false);
+      loadData();
+  }
+
+  return(
+    <div className="container">
+
+      <h1>Kutatók CRUD (React)</h1>
+
+      <div className="form">
+        <input placeholder="Név" value={nev} onChange={e=>setNev(e.target.value)} />
+        <input type="number" placeholder="Születési év" value={szul} onChange={e=>setSzul(e.target.value)} />
+        <input type="number" placeholder="Halálozási év" value={meghal} onChange={e=>setMeghal(e.target.value)} />
+        <button onClick={addItem}>Hozzáadás</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>FKOD</th>
+            <th>Név</th>
+            <th>Született</th>
+            <th>Meghalt</th>
+            <th>Műveletek</th>
+          </tr>
+        </thead>
+        <tbody>
+          {kutatok.map(k=>(
+            <tr key={k.fkod}>
+              <td>{k.fkod}</td>
+              <td>{k.nev}</td>
+              <td>{k.szul||""}</td>
+              <td>{k.meghal||""}</td>
+              <td>
+                <button onClick={()=>openEditModal(k)}>Szerkesztés</button>
+                <button className="delete"
+                        onClick={()=>deleteItem(k.fkod)}>
+                  Törlés
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {modalOpen && (
+        <div className="modal">
+          <div className="modalContent">
+
+            <h3>Szerkesztés</h3>
+
+            <input type="number"
+              value={editData.newFkod}
+              onChange={e=>setEditData({...editData,newFkod:e.target.value})}/>
+
+            <input
+              value={editData.nev}
+              onChange={e=>setEditData({...editData,nev:e.target.value})}/>
+
+            <input type="number"
+              value={editData.szul}
+              onChange={e=>setEditData({...editData,szul:e.target.value})}/>
+
+            <input type="number"
+              value={editData.meghal}
+              onChange={e=>setEditData({...editData,meghal:e.target.value})}/>
+
+            <button onClick={saveEdit}>Mentés</button>
+            <button onClick={()=>setModalOpen(false)}>Mégse</button>
+
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+
+</script>
+
+</body>
+</html>
