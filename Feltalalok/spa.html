@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>SPA React</title>
+<link rel="stylesheet" href="style.css">
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+<style>
+.spa-nav {
+  margin: 15px 0;
+}
+.spa-btn {
+  padding: 8px 16px;
+  margin-right: 10px;
+  background-color: #4facfe;
+  color: white;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.spa-btn:hover {
+  background-color: #00f2fe;
+}
+.color-preview {
+  border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<h1>SPA Menü - React</h1>
+<div id="root"></div>
+
+<script>
+const { useState } = React;
+
+function TodoInput({ addTodo }) {
+  const [text,setText]=useState("");
+  return React.createElement("div",null,
+    React.createElement("input",{placeholder:"Új tennivaló", value:text, onChange:e=>setText(e.target.value)}),
+    React.createElement("button",{onClick:()=>{ if(text!==""){ addTodo(text); setText(""); }}}, "Hozzáadás")
+  );
+}
+
+function TodoList({ todos, deleteTodo }) {
+  return React.createElement("ul",null,
+    todos.map((t,i)=>React.createElement("li",{key:i}, t,
+      React.createElement("button",{onClick:()=>deleteTodo(i)},"X")
+    ))
+  );
+}
+
+function TodoApp() {
+  const [todos,setTodos]=useState([]);
+  const addTodo = t => setTodos([...todos,t]);
+  const deleteTodo = i => setTodos(todos.filter((_,idx)=>idx!==i));
+  return React.createElement("div",null,
+    React.createElement("h2",null,"TODO Lista"),
+    React.createElement(TodoInput,{addTodo:addTodo}),
+    React.createElement(TodoList,{todos:todos,deleteTodo:deleteTodo})
+  );
+}
+
+function ColorSlider({ name, value, setValue }) {
+  return React.createElement("div",null, name+": "+value,
+    React.createElement("input",{type:"range", min:0, max:255, value:value, onChange:e=>setValue(e.target.value)})
+  );
+}
+
+function ColorPreview({ r,g,b }) {
+  return React.createElement("div",{className:"color-preview", style:{width:"200px",height:"200px",border:"1px solid black",margin:"10px auto", backgroundColor:`rgb(${r},${g},${b})`}});
+}
+
+function ColorPicker() {
+  const [r,setR]=useState(0); 
+  const [g,setG]=useState(0); 
+  const [b,setB]=useState(0);
+  return React.createElement("div",null,
+    React.createElement("h2",null,"Color Picker"),
+    React.createElement(ColorSlider,{name:"R", value:r, setValue:setR}),
+    React.createElement(ColorSlider,{name:"G", value:g, setValue:setG}),
+    React.createElement(ColorSlider,{name:"B", value:b, setValue:setB}),
+    React.createElement(ColorPreview,{r:r,g:g,b:b})
+  );
+}
+
+function SPAApp() {
+  const [page,setPage]=useState(""); 
+
+  return React.createElement("div",null,
+    React.createElement("nav",{className:"spa-nav"},
+      React.createElement("button",{className:"spa-btn", onClick:()=>setPage("todo")},"TODO Lista"),
+      React.createElement("button",{className:"spa-btn", onClick:()=>setPage("color")},"Color Picker")
+    ),
+    React.createElement("hr"),
+    page==="todo" ? React.createElement(TodoApp) :
+    page==="color" ? React.createElement(ColorPicker) :
+    React.createElement("p", null, "Válassz egy menüpontot a fenti gombokkal")
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(SPAApp));
+</script>
+
+</body>
+</html>

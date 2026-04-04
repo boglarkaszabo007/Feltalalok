@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Kutatók CRUD</title>
 <style>
-/* Általános stílusok */
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(to right, #4facfe, #00f2fe);
@@ -14,7 +13,6 @@ body {
     margin: 0;
 }
 
-/* Űrlap inputok és gombok */
 input {
     margin: 5px;
     padding: 5px;
@@ -37,7 +35,6 @@ button:hover {
     background-color: #00f2fe;
 }
 
-/* Táblázat stílus */
 table {
     border-collapse: collapse;
     width: 80%;
@@ -56,7 +53,6 @@ th {
     background-color: rgba(0,0,0,0.1);
 }
 
-/* Modális ablak */
 #editModal {
     display: none;
     position: fixed;
@@ -89,7 +85,6 @@ th {
 
 <h1>Kutatók CRUD</h1>
 
-<!-- Új rekord hozzáadása -->
 <div>
     <input type="text" id="nev" placeholder="Név">
     <input type="number" id="szul" placeholder="Születési év">
@@ -97,10 +92,8 @@ th {
     <button id="addBtn">Hozzáadás</button>
 </div>
 
-<!-- Lista -->
 <div id="list"></div>
 
-<!-- Modális szerkesztés -->
 <div id="editModal">
     <div id="editModalContent">
         <h3>Szerkesztés</h3>
@@ -121,7 +114,6 @@ th {
 const API_URL = "http://w.apexracing01.infora.hu/Feltalalok/api1.php";
 let kutatok = [];
 
-// Adatok betöltése
 async function loadData() {
     try {
         const res = await fetch(API_URL);
@@ -132,7 +124,6 @@ async function loadData() {
     }
 }
 
-// Lista renderelése
 function render() {
     const listDiv = document.getElementById("list");
     if(kutatok.length===0){ listDiv.innerHTML="<p>Nincsenek adatok.</p>"; return; }
@@ -154,7 +145,6 @@ function render() {
     listDiv.innerHTML = html;
 }
 
-// Új rekord hozzáadása
 document.getElementById("addBtn").addEventListener("click", async () => {
     const nev = document.getElementById("nev").value;
     const szul = document.getElementById("szul").value || null;
@@ -175,7 +165,6 @@ document.getElementById("addBtn").addEventListener("click", async () => {
     }
 });
 
-// Modális szerkesztés megnyitása
 function openEditModal(fkod) {
     const item = kutatok.find(k => Number(k.fkod) === Number(fkod));
     if(!item) return;
@@ -189,7 +178,6 @@ function openEditModal(fkod) {
     document.getElementById("editModal").style.display = "block";
 }
 
-// Mentés modálból
 document.getElementById("saveEditBtn").addEventListener("click", async () => {
     const oldFkod = document.getElementById("editFkod").dataset.original;
     const newFkod = document.getElementById("editFkod").value;
@@ -210,11 +198,9 @@ document.getElementById("saveEditBtn").addEventListener("click", async () => {
     }
 });
 
-// Mégse modálisban
 document.getElementById("cancelEditBtn").addEventListener("click", closeEditModal);
 function closeEditModal(){ document.getElementById("editModal").style.display="none"; }
 
-// Törlés
 async function deleteItem(fkod){
     if(!confirm("Biztosan törlöd a rekordot?")) return;
 

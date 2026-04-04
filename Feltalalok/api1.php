@@ -2,7 +2,6 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
-// Adatbázis kapcsolódás
 $host = "localhost";
 $dbname = "feltalalok";
 $user = "feltalalok";
@@ -14,14 +13,19 @@ if ($conn->connect_error) die(json_encode(["error" => "Connection failed: ".$con
 $method = $_SERVER['REQUEST_METHOD'];
 $input = json_decode(file_get_contents("php://input"), true);
 
-// Nethely trükk: POST + _method
 if($method === 'POST' && isset($input['_method'])) {
     $method = strtoupper($input['_method']);
 }
 
+function toIntOrNull($val) {
+    if(!isset($val)) return "NULL";          
+    $val = trim($val);
+    if($val === "" || !is_numeric($val)) return "NULL";  
+    return intval($val);                     
+}
+
 switch($method) {
 
-    // LISTA (READ)
     case 'GET':
         $result = $conn->query("SELECT * FROM kutato ORDER BY fkod");
         $rows = [];
@@ -29,13 +33,11 @@ switch($method) {
         echo json_encode($rows);
         break;
 
-    // ÚJ rekord (CREATE)
-    case 'POST':
+    case 'POST': // CREATE
         $nev = $conn->real_escape_string($input['nev']);
-        $szul = isset($input['szul']) && $input['szul'] !== null ? intval($input['szul']) : "NULL";
-        $meghal = isset($input['meghal']) && $input['meghal'] !== null ? intval($input['meghal']) : "NULL";
+        $szul = toIntOrNull($input['szul']);
+        $meghal = toIntOrNull($input['meghal']);
 
-        // Következő FKOD meghatározása
         $res = $conn->query("SELECT MAX(fkod) AS maxFkod FROM kutato");
         $row = $res->fetch_assoc();
         $nextFkod = ($row['maxFkod'] !== null ? intval($row['maxFkod']) + 1 : 1);
@@ -44,8 +46,7 @@ switch($method) {
         echo json_encode(["success"=>true, "fkod"=>$nextFkod]);
         break;
 
-    // Rekord szerkesztése (UPDATE, FKOD módosítható)
-    case 'PUT':
+    case 'PUT': // UPDATE
         if(!isset($input['oldFkod']) || !isset($input['newFkod'])) {
             echo json_encode(["error"=>"oldFkod vagy newFkod hiányzik"]);
             break;
@@ -54,14 +55,13 @@ switch($method) {
         $oldFkod = intval($input['oldFkod']);
         $newFkod = intval($input['newFkod']);
         $nev = $conn->real_escape_string($input['nev']);
-        $szul = isset($input['szul']) && $input['szul'] !== null ? intval($input['szul']) : "NULL";
-        $meghal = isset($input['meghal']) && $input['meghal'] !== null ? intval($input['meghal']) : "NULL";
+        $szul = toIntOrNull($input['szul']);
+        $meghal = toIntOrNull($input['meghal']);
 
         $conn->query("UPDATE kutato SET fkod=$newFkod, nev='$nev', szul=$szul, meghal=$meghal WHERE fkod=$oldFkod");
         echo json_encode(["success"=>true]);
         break;
 
-    // Rekord törlése (DELETE)
     case 'DELETE':
         if(!isset($input['fkod'])) {
             echo json_encode(["error"=>"fkod hiányzik"]);

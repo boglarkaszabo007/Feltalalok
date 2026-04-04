@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>CRUD alkalmazás - JS + Fetch</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Kutatók CRUD (JS + Fetch Api)</h1>
+
+<div class="form">
+  <input id="nev" placeholder="Név">
+  <input id="szul" type="number" placeholder="Születési év">
+  <input id="meghal" type="number" placeholder="Halálozási év">
+  <button id="addBtn">Hozzáadás</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>FKOD</th>
+      <th>Név</th>
+      <th>Született</th>
+      <th>Meghalt</th>
+      <th>Műveletek</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<div id="editModal" style="display:none;">
+  <div id="editModalContent">
+    <h3>Szerkesztés</h3>
+    <input id="editNev" placeholder="Név">
+    <input id="editSzul" type="number" placeholder="Születési év">
+    <input id="editMeghal" type="number" placeholder="Halálozási év">
+    <button id="saveBtn">Mentés</button>
+    <button onclick="closeModal()">Mégse</button>
+  </div>
+</div>
+
+<script>
+const API_URL = "api1.php"; 
+
+let currentEditFkod = null;
+
+async function loadData() {
+  const res = await fetch(API_URL);
+  const data = await res.json();
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+  data.forEach(k => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${k.fkod}</td>
+      <td>${k.nev}</td>
+      <td>${k.szul || ""}</td>
+      <td>${k.meghal || ""}</td>
+      <td>
+        <button onclick="editItem(${k.fkod}, '${k.nev}', '${k.szul}', '${k.meghal}')">Szerkesztés</button>
+        <button onclick="deleteItem(${k.fkod})">Törlés</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById("addBtn").addEventListener("click", async () => {
+  const nev = document.getElementById("nev").value;
+  const szul = document.getElementById("szul").value;
+  const meghal = document.getElementById("meghal").value;
+
+  if(!nev) return alert("Adjon meg nevet!");
+
+  await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nev, szul, meghal })
+  });
+
+  document.getElementById("nev").value = "";
+  document.getElementById("szul").value = "";
+  document.getElementById("meghal").value = "";
+
+  loadData();
+});
+
+async function deleteItem(fkod) {
+  if(!confirm("Biztosan törli?")) return;
+
+  await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ _method: "DELETE", fkod })
+  });
+
+  loadData();
+}
+
+function editItem(fkod, nev, szul, meghal) {
+  currentEditFkod = fkod;
+  document.getElementById("editNev").value = nev;
+  document.getElementById("editSzul").value = szul || "";
+  document.getElementById("editMeghal").value = meghal || "";
+  document.getElementById("editModal").style.display = "block";
+}
+
+document.getElementById("saveBtn").addEventListener("click", async () => {
+  const nev = document.getElementById("editNev").value;
+  const szul = document.getElementById("editSzul").value;
+  const meghal = document.getElementById("editMeghal").value;
+
+  await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ _method: "PUT", fkod: currentEditFkod, nev, szul, meghal })
+  });
+
+  closeModal();
+  loadData();
+});
+
+function closeModal() {
+  document.getElementById("editModal").style.display = "none";
+}
+
+loadData();
+</script>
+
+</body>
+</html>
