@@ -1,6 +1,13 @@
 <?php
 header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
 $host = "localhost";
 $dbname = "feltalalok";
@@ -17,11 +24,9 @@ if($method === 'POST' && isset($input['_method'])) {
     $method = strtoupper($input['_method']);
 }
 
-function toIntOrNull($val) {
-    if(!isset($val)) return "NULL";          
-    $val = trim($val);
-    if($val === "" || !is_numeric($val)) return "NULL";  
-    return intval($val);                     
+function toYearOrNull($val) {
+    if(!isset($val) || trim($val) === "") return "NULL";
+    return "'" . intval($val) . "'";
 }
 
 switch($method) {
@@ -35,8 +40,8 @@ switch($method) {
 
     case 'POST': // CREATE
         $nev = $conn->real_escape_string($input['nev']);
-        $szul = toIntOrNull($input['szul']);
-        $meghal = toIntOrNull($input['meghal']);
+        $szul = toYearOrNull($input['szul']);
+        $meghal = toYearOrNull($input['meghal']);
 
         $res = $conn->query("SELECT MAX(fkod) AS maxFkod FROM kutato");
         $row = $res->fetch_assoc();
@@ -55,8 +60,8 @@ switch($method) {
         $oldFkod = intval($input['oldFkod']);
         $newFkod = intval($input['newFkod']);
         $nev = $conn->real_escape_string($input['nev']);
-        $szul = toIntOrNull($input['szul']);
-        $meghal = toIntOrNull($input['meghal']);
+        $szul = toYearOrNull($input['szul']);
+        $meghal = toYearOrNull($input['meghal']);
 
         $conn->query("UPDATE kutato SET fkod=$newFkod, nev='$nev', szul=$szul, meghal=$meghal WHERE fkod=$oldFkod");
         echo json_encode(["success"=>true]);

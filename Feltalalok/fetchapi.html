@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
-<title>CRUD alkalmazás - JS + Fetch</title>
+<title>CRUD alkalmazás - JS + Fetch Api</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -45,6 +45,7 @@ const API_URL = "api1.php";
 
 let currentEditFkod = null;
 
+// Adatok betöltése
 async function loadData() {
   const res = await fetch(API_URL);
   const data = await res.json();
@@ -58,7 +59,7 @@ async function loadData() {
       <td>${k.szul || ""}</td>
       <td>${k.meghal || ""}</td>
       <td>
-        <button onclick="editItem(${k.fkod}, '${k.nev}', '${k.szul}', '${k.meghal}')">Szerkesztés</button>
+        <button onclick="editItem(${k.fkod}, '${k.nev}', '${k.szul || ""}', '${k.meghal || ""}')">Szerkesztés</button>
         <button onclick="deleteItem(${k.fkod})">Törlés</button>
       </td>
     `;
@@ -66,17 +67,22 @@ async function loadData() {
   });
 }
 
+// Hozzáadás
 document.getElementById("addBtn").addEventListener("click", async () => {
-  const nev = document.getElementById("nev").value;
+  const nev = document.getElementById("nev").value.trim();
   const szul = document.getElementById("szul").value;
   const meghal = document.getElementById("meghal").value;
 
-  if(!nev) return alert("Adjon meg nevet!");
+  if (!nev) return alert("Adjon meg nevet!");
 
   await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ nev, szul, meghal })
+    body: JSON.stringify({
+      nev,
+      szul: szul ? parseInt(szul) : null,
+      meghal: meghal ? parseInt(meghal) : null
+    })
   });
 
   document.getElementById("nev").value = "";
@@ -86,8 +92,9 @@ document.getElementById("addBtn").addEventListener("click", async () => {
   loadData();
 });
 
+// Törlés
 async function deleteItem(fkod) {
-  if(!confirm("Biztosan törli?")) return;
+  if (!confirm("Biztosan törli?")) return;
 
   await fetch(API_URL, {
     method: "POST",
@@ -98,6 +105,7 @@ async function deleteItem(fkod) {
   loadData();
 }
 
+// Szerkesztés megnyitása
 function editItem(fkod, nev, szul, meghal) {
   currentEditFkod = fkod;
   document.getElementById("editNev").value = nev;
@@ -106,25 +114,37 @@ function editItem(fkod, nev, szul, meghal) {
   document.getElementById("editModal").style.display = "block";
 }
 
+// Mentés
 document.getElementById("saveBtn").addEventListener("click", async () => {
-  const nev = document.getElementById("editNev").value;
+  const nev = document.getElementById("editNev").value.trim();
   const szul = document.getElementById("editSzul").value;
   const meghal = document.getElementById("editMeghal").value;
+
+  if (!nev) return alert("Adjon meg nevet!");
 
   await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ _method: "PUT", fkod: currentEditFkod, nev, szul, meghal })
+    body: JSON.stringify({
+      _method: "PUT",
+      oldFkod: currentEditFkod,       // PHP PUT-hoz kell
+      newFkod: currentEditFkod,       // FKOD változatlan
+      nev,
+      szul: szul ? parseInt(szul) : null,
+      meghal: meghal ? parseInt(meghal) : null
+    })
   });
 
   closeModal();
   loadData();
 });
 
+// Modal bezárása
 function closeModal() {
   document.getElementById("editModal").style.display = "none";
 }
 
+// Betöltés induláskor
 loadData();
 </script>
 
