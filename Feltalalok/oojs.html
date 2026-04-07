@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>OOJS Menu</title>
+    <style>
+  :root {
+    --bg: #eef1f5;
+    --sidebar-bg: #ffffff;
+    --panel-bg: #ffffff;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --text: #1f2937;
+    --radius: 10px;
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    --transition: 0.2s ease;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+}
+
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+    font-size: 22px;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: var(--shadow);
+}
+
+
+.menu-container {
+    width: 240px;
+    background: var(--sidebar-bg);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 60px;
+}
+
+.menu-item {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    background: #e5e7eb;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 15px;
+}
+
+.menu-item:hover {
+    background: #d1d5db;
+}
+
+.menu-item.active {
+    background: var(--primary);
+    color: white;
+}
+
+
+.panel {
+    flex: 1;
+    margin: 90px 30px 30px 30px;
+    background: var(--panel-bg);
+    padding: 30px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow-y: auto;
+}
+
+input {
+    padding: 10px;
+    border-radius: var(--radius);
+    border: 1px solid #d1d5db;
+    width: 100%;
+    margin-bottom: 12px;
+    font-size: 15px;
+}
+
+button {
+    padding: 10px 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 15px;
+}
+
+button:hover {
+    background: var(--primary-hover);
+}
+
+ul {
+    padding-left: 20px;
+    margin-top: 10px;
+}
+
+    </style>
+</head>
+<body>
+
+<div class="header">-OOJS Menü-</div>
+
+<script>
+    class Component {
+        constructor() {
+            this.element = null;
+        }
+        create(tag, cls = "") {
+            const el = document.createElement(tag);
+            if (cls) el.className = cls;
+            this.element = el;
+            return el;
+        }
+        appendTo(parent) {
+            parent.appendChild(this.element);
+        }
+    }
+
+    class Menu extends Component {
+        constructor(items, onSelect) {
+            super();
+            this.items = items;
+            this.onSelect = onSelect;
+            this.activeIndex = null;
+        }
+
+        render() {
+            const container = this.create("div", "menu-container");
+
+            this.items.forEach((item, index) => {
+                const div = document.createElement("div");
+                div.className = "menu-item";
+                div.textContent = item.label;
+
+                div.addEventListener("click", () => {
+                    this.setActive(index);
+                    this.onSelect(item);
+                });
+
+                container.appendChild(div);
+            });
+
+            return container;
+        }
+
+        setActive(index) {
+            this.activeIndex = index;
+            const items = this.element.querySelectorAll(".menu-item");
+            items.forEach((el, i) => {
+                el.classList.toggle("active", i === index);
+            });
+        }
+    }
+
+    class Panel extends Component {
+        constructor() {
+            super();
+        }
+        clear() {
+            this.element.innerHTML = "";
+        }
+
+        setTitle(text) {
+            const title = document.createElement("h2");
+            title.textContent = text;
+            title.style.marginTop = "0";
+            this.element.appendChild(title);
+        }
+    }
+
+    
+    class ColorPanel extends Panel {
+        constructor() {
+            super();
+        }
+        render() {
+            const box = this.create("div", "panel");
+
+            this.setTitle("Színváltó");
+
+            const btn = document.createElement("button");
+            btn.textContent = "Háttérszín váltása";
+
+            btn.addEventListener("click", () => {
+                document.body.style.background = "#" + Math.floor(Math.random()*16777215).toString(16);
+            });
+
+            box.appendChild(btn);
+            return box;
+        }
+    }
+
+    
+    class CalculatorPanel extends Panel {
+        constructor() {
+            super();
+        }
+        render() {
+            const box = this.create("div", "panel");
+
+            this.setTitle("Számológép");
+
+            const a = document.createElement("input");
+            a.type = "number";
+            a.placeholder = "Első szám";
+
+            const b = document.createElement("input");
+            b.type = "number";
+            b.placeholder = "Második szám";
+
+            const addBtn = document.createElement("button");
+            addBtn.textContent = "Összeadás";
+
+            const subBtn = document.createElement("button");
+            subBtn.textContent = "Kivonás";
+
+            const mulBtn = document.createElement("button");
+            mulBtn.textContent = "Szorzás";
+
+            const divBtn = document.createElement("button");
+            divBtn.textContent = "Osztás";
+
+            const result = document.createElement("div");
+            result.style.marginTop = "15px";
+            result.style.fontWeight = "bold";
+
+            addBtn.addEventListener("click", () => {
+                result.textContent = "Eredmény: " + (Number(a.value) + Number(b.value));
+            });
+
+            subBtn.addEventListener("click", () => {
+                result.textContent = "Eredmény: " + (Number(a.value) - Number(b.value));
+            });
+
+            mulBtn.addEventListener("click", () => {
+                result.textContent = "Eredmény: " + (Number(a.value) * Number(b.value));
+            });
+
+            divBtn.addEventListener("click", () => {
+                const x = Number(a.value);
+                const y = Number(b.value);
+
+                if (y === 0) {
+                    result.textContent = "Nem osztható (0-val nem lehet osztani)";
+                } else if (x % y !== 0) {
+                    result.textContent = "Nem osztható (nem egész szám az eredmény)";
+                } else {
+                    result.textContent = "Eredmény: " + (x / y);
+                }
+            });
+
+            box.append(a, b, addBtn, subBtn, mulBtn, divBtn, result);
+            return box;
+        }
+    }
+
+    
+    class ListPanel extends Panel {
+        constructor() {
+            super();
+            this.items = [];
+        }
+        render() {
+            const box = this.create("div", "panel");
+
+            this.setTitle("To-Do lista");
+
+            const input = document.createElement("input");
+            input.placeholder = "Új teendő";
+
+            const btn = document.createElement("button");
+            btn.textContent = "Hozzáadás";
+
+            const ul = document.createElement("ul");
+
+            btn.addEventListener("click", () => {
+                const text = input.value.trim();
+                if (text !== "") {
+                    this.items.push(text);
+
+                    const li = document.createElement("li");
+                    li.textContent = text + " ";
+
+                    const delBtn = document.createElement("button");
+                    delBtn.textContent = "Törlés";
+                    delBtn.style.marginLeft = "10px";
+                    delBtn.style.background = "#ef4444";
+                    delBtn.style.padding = "4px 8px";
+                    delBtn.style.borderRadius = "6px";
+
+                    delBtn.addEventListener("click", () => {
+                        ul.removeChild(li);
+                        this.items = this.items.filter(i => i !== text);
+                    });
+
+                    li.appendChild(delBtn);
+                    ul.appendChild(li);
+
+                    input.value = "";
+                }
+            });
+
+            box.append(input, btn, ul);
+            return box;
+        }
+    }
+
+  
+    class ClockPanel extends Panel {
+        constructor() {
+            super();
+        }
+        render() {
+            const box = this.create("div", "panel");
+
+            this.setTitle("Óra");
+
+            const time = document.createElement("div");
+            time.style.fontSize = "24px";
+
+            setInterval(() => {
+                time.textContent = new Date().toLocaleTimeString();
+            }, 1000);
+
+            box.appendChild(time);
+            return box;
+        }
+    }
+
+   
+    const mainPanel = new Panel();
+    const mainEl = mainPanel.create("div", "panel");
+    document.body.appendChild(mainEl);
+
+    
+    const menu = new Menu(
+        [
+            { label: "Színváltó", panel: new ColorPanel() },
+            { label: "Számológép", panel: new CalculatorPanel() },
+            { label: "To-Do lista", panel: new ListPanel() },
+            { label: "Óra", panel: new ClockPanel() }
+        ],
+        (item) => {
+            mainPanel.clear();
+            const p = item.panel.render();
+            mainPanel.element.appendChild(p);
+        }
+    );
+
+    document.body.appendChild(menu.render());
+</script>
+
+</body>
+</html>
