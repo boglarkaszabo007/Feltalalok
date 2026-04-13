@@ -1,222 +1,182 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-<meta charset="UTF-8">
-<title>Kutatók CRUD</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to right, #4facfe, #00f2fe);
-    padding: 20px;
-    text-align: center;
-    min-height: 100vh;
-    margin: 0;
-}
-
-input {
-    margin: 5px;
-    padding: 5px;
-    border: 1px solid #888;
-    border-radius: 4px;
-}
-
-button {
-    margin-left: 5px;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: #4facfe;
-    color: white;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-button:hover {
-    background-color: #00f2fe;
-}
-
-table {
-    border-collapse: collapse;
-    width: 80%;
-    margin: 20px auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    background-color: rgba(255, 255, 255, 0.85);
-}
-
-th, td {
-    border: 1px solid #333;
-    padding: 8px;
-    text-align: left;
-}
-
-th {
-    background-color: rgba(0,0,0,0.1);
-}
-
-#editModal {
-    display: none;
-    position: fixed;
-    z-index: 10;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5);
-}
-
-#editModalContent {
-    background-color: rgba(255, 255, 255, 0.95);
-    margin: 10% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 300px;
-    border-radius: 10px;
-}
-
-#editModalContent input {
-    width: 100%;
-    margin: 5px 0;
-    padding: 5px;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Javascript CRUD</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Kutatók CRUD</h1>
+<h2>Kutatók CRUD</h2>
 
-<div>
-    <input type="text" id="nev" placeholder="Név">
-    <input type="number" id="szul" placeholder="Születési év">
-    <input type="number" id="meghal" placeholder="Halálozási év">
-    <button id="addBtn">Hozzáadás</button>
-</div>
+<input type="text" id="nev" placeholder="Név">
+<input type="number" id="szul" placeholder="Születés">
+<input type="number" id="meghal" placeholder="Halál">
 
-<div id="list"></div>
+<button onclick="hozzaad()">Hozzáadás</button>
 
-<div id="editModal">
-    <div id="editModalContent">
-        <h3>Szerkesztés</h3>
-        <label>FKOD:</label>
-        <input type="number" id="editFkod">
-        <label>Név:</label>
-        <input type="text" id="editNev" placeholder="Név">
-        <label>Születési év:</label>
-        <input type="number" id="editSzul" placeholder="Születési év">
-        <label>Halálozási év:</label>
-        <input type="number" id="editMeghal" placeholder="Halálozási év">
-        <button id="saveEditBtn">Mentés</button>
-        <button id="cancelEditBtn">Mégse</button>
-    </div>
-</div>
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Név</th>
+            <th>Születés</th>
+            <th>Halál</th>
+            <th>Művelet</th>
+        </tr>
+    </thead>
+    <tbody id="tabla"></tbody>
+</table>
 
 <script>
-const API_URL = "http://w.apexracing01.infora.hu/Feltalalok/api1.php";
-let kutatok = [];
 
-async function loadData() {
-    try {
-        const res = await fetch(API_URL);
-        kutatok = await res.json();
-        render();
-    } catch(err){
-        console.error("Hiba a betöltésnél:", err);
+// Feltalálok adatbázisából a kutatok.txt lett felhasználva.
+let kutatok = [
+    { fkod: 40, nev: "Kühne Ede", szul: 1839, meghal: 1903 },
+    { fkod: 14, nev: "Déri Miksa", szul: 1854, meghal: 1938 },
+    { fkod: 16, nev: "Fejes Jenő", szul: 1877, meghal: 1952 },
+    { fkod: 56, nev: "Reich Ernő", szul: 1887, meghal: 1965 },
+    { fkod: 10, nev: "Bródy Imre", szul: 1891, meghal: 1944 },
+    { fkod: 3, nev: "Bay Zoltán", szul: 1900, meghal: 1992 },
+    { fkod: 72, nev: "Teller Ede", szul: 1908, meghal: 2003 } ,
+    { fkod: 6, nev: "Bárczy Pál", szul: 1941 }, 
+    { fkod: 5 ,nev: "Bánki Donát", szul: 1859,meghal: 1922 }, 
+    { fkod: 33 ,nev: "Just Sándor ",szul:1874,meghal: 1937 },
+    { fkod: 52 ,nev: "Pogány Béla ",szul:1887,meghal: 1943 },
+    { fkod: 21 ,nev: "Gáspár Béla ",szul:1898,meghal: 1973 },
+    { fkod: 68 ,nev: "Szilárd Leó ",szul:1898,meghal: 1964 },
+    { fkod: 79 ,nev: "Bíró László ",szul:1899,meghal: 1985 },
+    { fkod: 20 ,nev: "Gábor Dénes ",szul:1900,meghal: 1979 },
+    { fkod: 75 ,nev: "Vecsei Géza ",szul:1902,meghal: 1960 },
+    { fkod: 77 ,nev: "Wigner Jenő ",szul:1902,meghal: 1995 },
+    { fkod: 22 ,nev: "Gerő Loránd ",szul:1910,meghal: 1945 },
+    { fkod: 24 ,nev: "Greguss Pál ",szul:1921,meghal: 2003 },
+    { fkod: 58 ,nev: "Roska Tamás ",szul:1940 },
+    { fkod: 19 ,nev: "Ganz Ábrahám",szul: 1814,meghal: 1867}, 
+    { fkod: 13 ,nev: "Csonka János",szul: 1852,meghal: 1939}, 
+    { fkod: 53 ,nev: "Pollák Antal",szul: 1865,meghal: 1943}, 
+    { fkod: 35 ,nev: "Kandó Kálmán",szul: 1869,meghal: 1931}, 
+    { fkod: 76 ,nev: "Virág József",szul: 1870,meghal: 1901}, 
+    { fkod: 36 ,nev: "Kármán Tódor",szul: 1881,meghal: 1963}, 
+    { fkod: 46 ,nev: "Mihály Dénes",szul: 1894,meghal: 1953}, 
+    { fkod: 71 ,nev: "Telkes Mária",szul: 1900,meghal: 1995}, 
+    { fkod: 45 ,nev: "Mondl Ferenc",szul: 1902,meghal: 1964}, 
+    { fkod: 59 ,nev: "Schmid Rezső",szul: 1904,meghal: 1943}, 
+    { fkod: 17 ,nev: "Forgó László",szul: 1907,meghal: 1980}, 
+    { fkod: 41 ,nev: "Kürti Miklós",szul: 1908,meghal: 1999}, 
+    { fkod: 66 ,nev: "Szabó István",szul: 1910,meghal: 1997}, 
+    { fkod: 11 ,nev: "Budó Ágoston",szul: 1914,meghal: 1969}, 
+    { fkod: 65 ,nev: "Szabó István",szul: 1941}, 
+    { fkod: 70 ,nev: "Szőcs István",szul: 1943 },
+    { fkod: 42 ,nev: "Landy Kornél",szul: 1948 },
+    { fkod: 2 ,nev: "Balogh Tibor", szul: 1956 },
+    { fkod: 63 ,nev: "Somogyi Adolf",szul: 1846 ,meghal: 1919}, 
+    { fkod: 7 ,nev: "Bermann Miksa", szul:1861 ,meghal: 1925 },
+    { fkod: 38 ,nev: "Kerpely Antal", szul: 1866 ,meghal: 1917 },
+    { fkod: 27 ,nev: "Hankóczy Jenö", szul: 1879 ,meghal: 1939 },
+    { fkod: 62 ,nev: "Sklenár János", szul: 1884 ,meghal: 1954 },
+    { fkod: 12 ,nev: "Buzágh Aladár", szul: 1895 ,meghal: 1962 },
+    { fkod: 8 ,nev: "Békésy György", szul:1899 ,meghal: 1972 },
+    { fkod: 4 ,nev: "Bánhidi Antal", szul:1902 ,meghal: 1994 },
+    { fkod: 15 ,nev: "Dulovits Jenő", szul:1903 ,meghal: 1972 },
+    { fkod: 48 ,nev: "Neumann János", szul:1903 ,meghal: 1957 },
+    { fkod: 34 ,nev: "Kalmár László", szul:1905 ,meghal: 1976 },
+    { fkod: 30 ,nev: "Heller László", szul:1907 ,meghal: 1980 },
+    { fkod: 67 ,nev: "Sziklay Péter", szul:1958 },
+    { fkod: 28 ,nev: "Hegedűs Ramón", szul:1982 },
+    { fkod: 51 ,nev: "Petzval József", szul: 1807 ,meghal: 1891}, 
+    { fkod: 55 ,nev: "Puskás Tivadar", szul: 1844 ,meghal: 1893}, 
+    { fkod: 18 ,nev: "Frommer Rudolf", szul: 1868 ,meghal: 1936}, 
+    { fkod: 26 ,nev: "Hanaman Ferenc", szul: 1878 ,meghal: 1941}, 
+    { fkod: 47 ,nev: "Mihályi József", szul: 1889 ,meghal: 1978}, 
+    { fkod: 69 ,nev: "Szilvay Kornél", szul: 1890 ,meghal: 1957}, 
+    { fkod: 73 ,nev: "Tihanyi Kálmán", szul: 1897 ,meghal: 1947}, 
+    { fkod: 54 ,nev: "Pulvári Károly", szul: 1907 ,meghal: 1999}, 
+    { fkod: 61 ,nev: "Simonyi Károly", szul: 1916 ,meghal: 2001}, 
+    { fkod: 74 ,nev: "Tófalvi Gyula", szul: 1927 ,meghal: 2003 },
+    { fkod: 50 ,nev: "Pavlics Ferenc", szul: 1928 },
+    { fkod: 44 ,nev: "Mechwart András", szul: 1834 ,meghal: 1907}, 
+    { fkod: 57 ,nev: "Riszdorfer Ödön", szul: 1893 ,meghal: 1944 },
+    { fkod: 64 ,nev: "Svachulay Sándor", szul: 1875 ,meghal: 1954 },
+    { fkod: 43 ,nev: "Maderspach Károly", szul: 1791 ,meghal: 1849 },
+    { fkod: 32 ,nev: "Jendrassik György", szul: 1898 ,meghal: 1954 },
+    { fkod: 29 ,nev: "Hell József Károly", szul: 1713 ,meghal: 1789 },
+    { fkod: 31 ,nev: "Jedlik Ányos István", szul: 1800 ,meghal: 1895 },
+    { fkod: 78 ,nev: "Zipernowsky Károly", szul: 1853 ,meghal: 1942 },
+    { fkod: 9 ,nev: "Bláthy Ottó Titusz", szul: 1860 ,meghal: 1939 },
+    { fkod: 49 ,nev: "Okolicsányi Ferenc", szul: 1894 ,meghal: 1954 },
+    { fkod: 1 ,nev: "Ajtay Zoltán Endre", szul: 1900 ,meghal: 1983 },
+    { fkod: 60 ,nev: "Segner János András", szul: 1704 ,meghal: 1777 },
+    { fkod: 25 ,nev: "Haggenmacher Károly", szul: 1835 ,meghal: 1921 },
+    { fkod: 37 ,nev: "Kemény János György", szul: 1926 ,meghal: 1992 },
+    { fkod: 80 ,nev: "Szent-Györgyi Albert" ,szul: 1893 ,meghal: 1986 },
+    { fkod: 23 ,nev: "Goldmark Péter Károly" ,szul: 1906 ,meghal: 1977 },
+    { fkod: 39 ,nev: "Köszeghi-Mártony Károly" ,szul: 1783 ,meghal: 1848 }
+];
+
+function megjelenit() {
+
+    kutatok.sort((a, b) => a.fkod - b.fkod);
+    let tabla = document.getElementById("tabla");
+    tabla.innerHTML = "";
+
+    for (let i = 0; i < kutatok.length; i++) {
+        let sor = `
+            <tr>
+                <td>${kutatok[i].fkod}</td>
+                <td>${kutatok[i].nev}</td>
+                <td>${kutatok[i].szul}</td>
+                <td>${kutatok[i].meghal || ""}</td>
+                <td>
+                    <button onclick="torol(${i})">Törlés</button>
+                    <button onclick="szerkeszt(${i})">Szerk.</button>
+                </td>
+            </tr>
+        `;
+        tabla.innerHTML += sor;
     }
 }
 
-function render() {
-    const listDiv = document.getElementById("list");
-    if(kutatok.length===0){ listDiv.innerHTML="<p>Nincsenek adatok.</p>"; return; }
+function hozzaad() {
+    let nev = document.getElementById("nev").value;
+    let szul = document.getElementById("szul").value;
+    let meghal = document.getElementById("meghal").value;
 
-    let html="<table><tr><th>FKOD</th><th>Név</th><th>Születési év</th><th>Halálozási év</th><th>Műveletek</th></tr>";
-    kutatok.forEach(k => {
-        html += `<tr>
-            <td>${k.fkod}</td>
-            <td>${k.nev}</td>
-            <td>${k.szul===null?'':k.szul}</td>
-            <td>${k.meghal===null?'':k.meghal}</td>
-            <td>
-                <button onclick="openEditModal(${k.fkod})">Szerkesztés</button>
-                <button onclick="deleteItem(${k.fkod})">Törlés</button>
-            </td>
-        </tr>`;
-    });
-    html += "</table>";
-    listDiv.innerHTML = html;
+    if (nev === "" || szul === "") {
+        alert("Kötelező mezők!");
+        return;
+    }
+
+    let uj = {
+        fkod: kutatok.length + 1,
+        nev: nev,
+        szul: parseInt(szul),
+        meghal: meghal ? parseInt(meghal) : ""
+    };
+
+    kutatok.push(uj);
+    megjelenit();
 }
 
-document.getElementById("addBtn").addEventListener("click", async () => {
-    const nev = document.getElementById("nev").value;
-    const szul = document.getElementById("szul").value || null;
-    const meghal = document.getElementById("meghal").value || null;
-
-    try {
-        await fetch(API_URL, {
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({nev, szul, meghal})
-        });
-        document.getElementById("nev").value='';
-        document.getElementById("szul").value='';
-        document.getElementById("meghal").value='';
-        await loadData();
-    } catch(err){
-        console.error("Hiba a hozzáadásnál:", err);
-    }
-});
-
-function openEditModal(fkod) {
-    const item = kutatok.find(k => Number(k.fkod) === Number(fkod));
-    if(!item) return;
-
-    const editFkodInput = document.getElementById("editFkod");
-    editFkodInput.value = item.fkod;
-    editFkodInput.dataset.original = item.fkod;
-    document.getElementById("editNev").value = item.nev;
-    document.getElementById("editSzul").value = item.szul || '';
-    document.getElementById("editMeghal").value = item.meghal || '';
-    document.getElementById("editModal").style.display = "block";
+function torol(index) {
+    kutatok.splice(index, 1);
+    megjelenit();
 }
 
-document.getElementById("saveEditBtn").addEventListener("click", async () => {
-    const oldFkod = document.getElementById("editFkod").dataset.original;
-    const newFkod = document.getElementById("editFkod").value;
-    const nev = document.getElementById("editNev").value;
-    const szul = document.getElementById("editSzul").value || null;
-    const meghal = document.getElementById("editMeghal").value || null;
+function szerkeszt(index) {
+    let ujNev = prompt("Új név:", kutatok[index].nev);
+    let ujSzul = prompt("Új születési év:", kutatok[index].szul);
+    let ujMeghal = prompt("Új halálozási év:", kutatok[index].meghal);
 
-    try {
-        await fetch(API_URL, {
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({_method:"PUT", oldFkod, newFkod, nev, szul, meghal})
-        });
-        closeEditModal();
-        await loadData();
-    } catch(err){
-        console.error("Hiba a mentésnél:", err);
-    }
-});
+    if (ujNev != null) kutatok[index].nev = ujNev;
+    if (ujSzul != null) kutatok[index].szul = parseInt(ujSzul);
+    if (ujMeghal != null) kutatok[index].meghal = parseInt(ujMeghal);
 
-document.getElementById("cancelEditBtn").addEventListener("click", closeEditModal);
-function closeEditModal(){ document.getElementById("editModal").style.display="none"; }
-
-async function deleteItem(fkod){
-    if(!confirm("Biztosan törlöd a rekordot?")) return;
-
-    try {
-        await fetch(API_URL, {
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({_method:"DELETE", fkod})
-        });
-        await loadData();
-    } catch(err){
-        console.error("Hiba a törlésnél:", err);
-    }
+    megjelenit();
 }
 
-loadData();
+megjelenit();
+
 </script>
 
 </body>
